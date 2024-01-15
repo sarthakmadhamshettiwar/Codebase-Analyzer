@@ -56,7 +56,7 @@ def load_model(api_key):
                                   safety_settings=safety_settings)
     return model
 
-model = load_model("AIzaSyBMaUxIOpOo8pTL44aJ9Wh-vhoBD58NLE0")
+model = load_model("GOOGLE-AI-STUDIO-API-KEY")
 
 class Github_Operator:
     def __init__(self, oAuthToken, userName, repoName, fileName):
@@ -297,7 +297,7 @@ class Code_Analyzer:
         bugs = self.model.generate_content(prompt_parts)
         return bugs.text
 
-oAuthToken = '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'
+oAuthToken = 'YOUR_GITHUB_OAUTH_TOKEN'
 userName = 'sarthakmadhamshettiwar'
 repoName = 'Codebase-Analyzer'
 fileName = 'bad_oops.cpp'
