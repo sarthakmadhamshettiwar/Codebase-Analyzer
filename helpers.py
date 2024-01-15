@@ -151,3 +151,28 @@ class CodeAnalyzer:
         ]
         bugs = self.model.generate_content(prompt_parts)
         return bugs.text
+
+    def testCase_generator(self, testcase):
+        '''
+        :param testcase: some sample testcases along with their input.
+        '''
+        prompt_template = PromptTemplate.from_template(
+            '''
+            Given code and the description, generate stronger test cases for the given code. Some test cases are already given.
+            Code: {code}.
+
+            Below testcases are in the format: 
+            'Input': .....
+            'Output': .....
+            Testcases: {testcase}
+
+            Generate few strong input cases and expected output.
+            '''
+        )
+
+        # Modify this to generate content about any topic in any number of words. Level bhi choose kar sakte khud se.
+        prompt_parts = [
+            prompt_template.format(testcase=testcase, code=self.code)
+        ]
+        testcases = self.model.generate_content(prompt_parts)
+        return testcases.text
