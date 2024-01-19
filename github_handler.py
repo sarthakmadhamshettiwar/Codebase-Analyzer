@@ -1,62 +1,73 @@
-class Github_Operator:
-    def __init__(self, oAuthToken, userName, repoName, fileName):
-        self.oAuthToken = oAuthToken
-        self.userName = userName
-        self.repoName = repoName
-        self.fileName = fileName
+import base64
+'''
+1. encoder(): takes English text as input and returns base64 encoded output in string format, instead of byte format.
+Similar to https://www.base64encode.org/
 
-    def codeExtractor(self):
+2. Github_Operator: takes a Github OAuthToken, Username, Repository Name, filename which you want to analyze while creating object.
+extract() method returns the data present in filename in English (automatically decoded from base64 encoding).
+commit(code): will update the the contents of 'filename' with 'code', expect 'code' to be already encoded in base64 encoding. For doing that encoder() method
+will be used.
+'''
+
+def encoder(text):
+    my_bytes = code.encode('utf-8')
+    updated_string = base64.b64encode(my_bytes)
+    s = str(updated_string)
+    return s[2:-1]
+      
+       
+class Github_Operator:
+    def __init__(self, token, userName, repoName, fileName):
+        self.token = token
+        self.user = userName
+        self.repo = repoName
+        self.file = fileName
+        self.sha = 'NULL'
+    def extract(self):
         headers = {
             'Accept': 'application/vnd.github+json',
-            'Authorization': f'Bearer {self.oAuthToken}',
+            'Authorization': f'Bearer {self.token}',
             'X-GitHub-Api-Version': '2022-11-28',
         }
         response = requests.get(
-            f'https://api.github.com/repos/{self.userName}/{self.repoName}/contents/{self.fileName}',
+            f'https://api.github.com/repos/{self.user}/{self.repo}/contents/{self.file}',
             headers=headers)
+
         encoded_code = response.json()['content']  # in 64 bit encoding
+        self.sha = response.json()['sha']
         decoded_code = base64.b64decode(encoded_code).decode('utf-8')
         self.decoded_code = decoded_code;
         return decoded_code
 
-    def get_SHA(self):
-        headers = {
-            'Accept': 'application/vnd.github+json',
-            'Authorization': 'Bearer ' + self.oAuthToken,
-            'X-GitHub-Api-Version': '2022-11-28',
-        }
-        response = requests.get(
-            f'https://api.github.com/repos/{self.userName}/{self.repoName}/contents/{self.fileName}',
-            headers=headers)
-        my_dict = literal_eval(response.content.decode('utf-8'))
-        return my_dict['sha']
-
-    def codeCommiter(self, updated_code):
-        url = f"https://api.github.com/repos/{self.userName}/{self.repoName}/contents/{self.fileName}"
+    def commit(self, code):
+      # code will be in english, first we need to convert it into base 64 encoding
+        url = f'https://api.github.com/repos/{self.user}/{self.repo}/contents/{self.file}'
 
         headers = CaseInsensitiveDict()
         headers["Accept"] = "application/vnd.github+json"
-        headers["Authorization"] = f"Bearer {self.oAuthToken}"
+        headers["Authorization"] = f"Bearer {self.token}"
         headers["X-GitHub-Api-Version"] = "2022-11-28"
         headers["Content-Type"] = "application/x-www-form-urlencoded"
 
-        # Extract SHA when downloading the file for the first time itself.
-        # Remember to update the SHA.
-        sha = self.get_SHA(self.oAuthToken, self.ownerName, self.repoName, self.fileName)
+        # Replace single quotes with double quotes
+        formatted_string = code.replace("'", '"')
 
-        # print(sha)
-        my_bytes = updated_code.encode('utf-8')
-        updated_encoded_code = base64.b64encode(my_bytes)
+        # Add double quotes around the entire string
+        final_result = f'"{formatted_string}"'
+        
+        data = {"message":"my commit message","committer":{"name":"Monalisa Octocat","email":"octocat@github.com"},"content":final_result[1:-1], "sha":self.sha}
+        data = json.dumps(data)
 
-        data = """
-        {"message":"Simple Commit For trying REST API.",
-          "committer":{"name":"Sarthak Madhamshettiwar","email":"sarthakmadhamshettiwar@gmail.com"},
-          "sha":""" + f'"{sha}"' + """, 
-          "content":""" + f'"{updated_encoded_code}"' + """}
-        """
-        # print(data)
+        # return data
         resp = requests.put(url, headers=headers, data=data)
-        if (resp.status_code == 200):
-            print('Code updated !')
-        else:
-            print(f'Error {resp.status_code}')
+        
+        # print(resp)
+        print(resp.status_code)
+        
+        if(resp.status_code == 200):
+          resp = resp.json()
+          self.sha = resp['content']['sha']
+          # pass
+
+
+operator = Github_Operator(oAuthToken, userName, repoName, fileName)
