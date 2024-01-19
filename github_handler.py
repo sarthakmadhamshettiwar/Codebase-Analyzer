@@ -40,7 +40,7 @@ class Github_Operator:
         return decoded_code
 
     def commit(self, code):
-      # code will be in english, first we need to convert it into base 64 encoding
+        # code is in encoded form already.
         url = f'https://api.github.com/repos/{self.user}/{self.repo}/contents/{self.file}'
 
         headers = CaseInsensitiveDict()
